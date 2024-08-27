@@ -20,7 +20,20 @@ const getUserByUsername = async (username) => {
   return rows[0];
 };
 
+const updateUserProfile = async (username, password, no_whatsapp, kota) => {
+  SQLQuery =
+    "UPDATE users SET password = ?, no_whatsapp = ?, kota = ? WHERE username = ?";
+  await DBPool.query(SQLQuery, [password, no_whatsapp, kota, username]);
+};
+
+const deleteUser = async (username) => {
+  SQLQuery = "DELETE FROM users WHERE username = ?";
+  await DBPool.query(SQLQuery, [username]);
+};
+
 module.exports = {
   createUser,
   getUserByUsername,
+  updateUserProfile,
+  deleteUser,
 };

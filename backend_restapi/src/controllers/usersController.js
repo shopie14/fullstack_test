@@ -60,7 +60,43 @@ const login = async (req, res) => {
   return response(400, tokenData, "Token Berhasil", res);
 };
 
+const editProfile = async (req, res) => {
+  const { password, no_whatsapp, kota } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await User.updateUserProfile(
+    req.user.username,
+    hashedPassword,
+    no_whatsapp,
+    kota
+  );
+
+  const userData = {
+    username: req.user.username,
+    no_whatsapp,
+    kota,
+  };
+
+  return response(400, userData, "Update profile berhasil!", res);
+};
+
+const deletProfile = async (req, res) => {
+  await User.deleteUser(req.user.username);
+
+  const userData = {
+    username: req.user.username,
+  };
+
+  return response(
+    400,
+    userData,
+    `Delete data user ${userData.username} berhasil!`,
+    res
+  );
+};
+
 module.exports = {
   register,
   login,
+  editProfile,
+  deletProfile,
 };

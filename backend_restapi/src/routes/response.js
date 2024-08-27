@@ -5,11 +5,6 @@ const response = (statuCode, data, message, res) => {
         data,
       },
       message,
-      metadata: {
-        prev: "",
-        next: "",
-        current: "",
-      },
     },
   ]);
 };
