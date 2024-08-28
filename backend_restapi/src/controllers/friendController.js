@@ -18,7 +18,7 @@ const getFriend = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const friends = await friendShip.friendList(userId);  // Ensure await is used
+    const friends = await friendShip.friendList(userId);  
     response(200, friends, "Friend found successfully", res);
   } catch (error) {
     console.error("Error fetching friend list:", error);

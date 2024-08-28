@@ -1,12 +1,11 @@
-const response = (statuCode, data, message, res) => {
-  res.json(statuCode, [
-    {
+const response = (statusCode, data, message, res) => {
+    res.status(statusCode).json({
       payload: {
-        data,
+        data: data
       },
-      message,
-    },
-  ]);
-};
-
-module.exports = response;
+      message: message
+    });
+  };
+  
+  module.exports = response;
+  

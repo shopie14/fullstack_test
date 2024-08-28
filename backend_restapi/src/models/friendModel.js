@@ -1,5 +1,5 @@
 const DBPool = require("../config/dbConnection");
-const response = require("../routes/response");
+// const response = require("../routes/response");
 
 // Add Friend
 const addFriend = async (userId, friendId) => {
