@@ -30,17 +30,19 @@ const Form = ({ isLoginPage = true }) => {
     console.log("data => ", data);
 
     try {
-      const res = await fetch(
-        `https://localhost:8000/api/${isLoginPage ? "login" : "register"}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-             "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const apiUrl = `${process.env.REACT_APP_API_URL}/${
+        isLoginPage ? "login" : "register"
+      }`;
+      console.log("API URL: ", apiUrl);
+
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -48,7 +50,6 @@ const Form = ({ isLoginPage = true }) => {
       }
       const resData = await res.json();
       console.log("resData => ", resData);
-
     } catch (error) {
       console.error("Fetch error: ", error);
     }
@@ -112,7 +113,7 @@ const Form = ({ isLoginPage = true }) => {
           )}
           <Button
             label={isLoginPage ? "Login" : "Daftar"}
-            className="mb-3 w-[50%] mt-7"
+            className="mb-3 w-[295px] mt-7"
             type="submit"
           />
         </form>

@@ -29,7 +29,7 @@ function App() {
         }
       />
       <Route path="/users/login" element={<Form isLoginPage={true} />} />
-      <Route path="/users/daftar" element={<Form isLoginPage={false} />} />
+      <Route path="/users/register" element={<Form isLoginPage={false} />} />
     </Routes>
   );
 }
