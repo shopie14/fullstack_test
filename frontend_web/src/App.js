@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children, auth = false }) => {
     return <Navigate to={"/users/login"} />;
   } else if (
     isLoggedIn &&
-    ["/users/login", "/users/daftar"].includes(window.location.pathname)
+    ["/users/login", "/users/register"].includes(window.location.pathname)
   ) {
     return <Navigate to={"/"} />;
   }

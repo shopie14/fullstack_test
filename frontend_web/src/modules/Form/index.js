@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useNavigate } from "react-router-dom";
+const token = localStorage.getItem("user:token");
 
 const Form = ({ isLoginPage = true }) => {
   const [data, setData] = useState({
-    ...(!isLoginPage && {
-      username: "",
-    }),
+    username: "",
     password: "",
     no_whatsApp: "",
     kota: "",
@@ -15,14 +14,43 @@ const Form = ({ isLoginPage = true }) => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("submitted");
-    // Navigasi ke halaman berikutnya berdasarkan kondisi tertentu
-    if (isLoginPage) {
-      navigate("/dashboard");
-    } else {
-      navigate("/login");
+  useEffect(() => {
+    setData((prevData) => ({
+      ...prevData,
+      username: isLoginPage ? "" : prevData.username,
+      password: "",
+      no_whatsApp: "",
+      kota: "",
+    }));
+  }, [isLoginPage]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    console.log("data => ", data);
+
+    try {
+      const res = await fetch(
+        `https://localhost:8000/api/${isLoginPage ? "login" : "register"}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+             "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Network response was not ok");
+      }
+      const resData = await res.json();
+      console.log("resData => ", resData);
+
+    } catch (error) {
+      console.error("Fetch error: ", error);
     }
   };
 
@@ -42,14 +70,16 @@ const Form = ({ isLoginPage = true }) => {
           className="flex flex-col items-center w-full"
           onSubmit={handleSubmit}
         >
-          <Input
-            label="Username"
-            name="username"
-            placeholder="Masukan username"
-            className="mb-3 w-[50%]"
-            value={data.username}
-            onChange={(e) => setData({ ...data, username: e.target.value })}
-          />
+          {!isLoginPage && (
+            <Input
+              label="Username"
+              name="username"
+              placeholder="Masukan username"
+              className="mb-3 w-[50%]"
+              value={data.username}
+              onChange={(e) => setData({ ...data, username: e.target.value })}
+            />
+          )}
           <Input
             label="Password"
             name="password"
@@ -62,7 +92,7 @@ const Form = ({ isLoginPage = true }) => {
             <>
               <Input
                 label="No WhatsApp"
-                name="number"
+                name="no_whatsApp"
                 placeholder="Masukan no WhatsApp"
                 className="mb-3 w-[50%]"
                 value={data.no_whatsApp}
@@ -72,7 +102,7 @@ const Form = ({ isLoginPage = true }) => {
               />
               <Input
                 label="Kota"
-                name="city"
+                name="kota"
                 placeholder="Masukan kota"
                 className="mb-3 w-[50%]"
                 value={data.kota}
@@ -92,7 +122,7 @@ const Form = ({ isLoginPage = true }) => {
               Belum punya akun?{" "}
               <span
                 className="text-primary cursor-pointer underline"
-                onClick={() => navigate("/users/daftar")}
+                onClick={() => navigate("/users/register")}
               >
                 Daftar
               </span>
