@@ -161,7 +161,7 @@ const Form = ({ isLoginPage = true }) => {
           )}
           <Button
             label={isLoginPage ? "Login" : "Daftar"}
-            className="mb-3 w-1/2 mt-7"
+            className="mb-3 w-[298px] mt-7"
             type="submit"
             disabled={loading}
           />
