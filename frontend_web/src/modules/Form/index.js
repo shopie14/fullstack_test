@@ -4,7 +4,6 @@ import Input from "../../components/Input";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-const token = localStorage.getItem("user_token");
 
 const Form = ({ isLoginPage = true }) => {
   const [data, setData] = useState({
@@ -28,44 +27,44 @@ const Form = ({ isLoginPage = true }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    console.log("data => ", data);
-
+  
+    console.log("Data yang dikirim:", data); 
+  
     try {
-      // const apiUrl = `${process.env.API_URL}/api/users/${
-      //   isLoginPage ? "login" : "register"
-      // }`;
-      const apiUrl = `http://localhost:8000/api/users/${
-        isLoginPage ? "login" : "register"
-      }`;
-      console.log("API URL: ", apiUrl);
-
+      const apiUrl = `http://localhost:8000/api/users/${isLoginPage ? "login" : "register"}`;
+      console.log("API URL:", apiUrl);
+  
       const res = await axios.post(apiUrl, data);
-
-      // const res = await fetch(apiUrl, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: isLoginPage ? undefined : `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify(data),
-      // });
-
-      if (isLoginPage) {
-        Cookies.set("user_token", res.data.token, { expires: 1 });
-        navigate("/");
-        // const errorData = await res.json();
-        // throw new Error(errorData.message || "Network response was not ok");
+  
+      console.log("Response dari server:", res.data);
+  
+      if (res.status === 200 || res.status === 201) {
+        const { tokenData, message } = res.data;
+        console.log("Response message:", message);
+        console.log("Response payload:", tokenData);
+  
+        if (isLoginPage) {
+          if (tokenData && tokenData.token) {
+            Cookies.set("user_token", tokenData.token);
+            localStorage.setItem("user_token", tokenData.token);
+            navigate("/");
+          } else {
+            console.error("Token tidak ditemukan di tokenData");
+          }
+        } else {
+          navigate("/users/login");
+        }
       } else {
-        navigate("/users/login");
+        console.error("Respon gagal dengan status:", res.status);
       }
     } catch (error) {
       console.error(
-        "Axios error: ",
+        "Axios error:",
         error.response ? error.response.data : error.message
       );
     }
   };
+  
 
   return (
     <div className="bg-primary-light h-screen flex items-center justify-center">
@@ -107,15 +106,32 @@ const Form = ({ isLoginPage = true }) => {
           {!isLoginPage && (
             <>
               <Input
+                label="Username"
+                name="username"
+                placeholder="Masukan username"
+                className="mb-3 w-[50%]"
+                value={data.username}
+                onChange={(e) => setData({ ...data, username: e.target.value })}
+              />
+              <Input
+                label="Password"
+                name="password"
+                placeholder="Masukan password"
+                className="mb-3 w-[50%]"
+                value={data.password}
+                onChange={(e) => setData({ ...data, password: e.target.value })}
+              />
+              <Input
                 label="No WhatsApp"
-                name="no_whatsApp"
+                name="no_whatsapp"
                 placeholder="Masukan no WhatsApp"
                 className="mb-3 w-[50%]"
-                value={data.no_whatsApp}
+                value={data.no_whatsapp}
                 onChange={(e) =>
-                  setData({ ...data, no_whatsApp: e.target.value })
+                  setData({ ...data, no_whatsapp: e.target.value })
                 }
               />
+
               <Input
                 label="Kota"
                 name="kota"
