@@ -1,10 +1,13 @@
+import React, { useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import axios from "axios";
+import Cookies from "js-cookie";
 import "./App.css";
 import Dashboard from "./modules/Dashboard";
 import Form from "./modules/Form";
-import { Routes, Route, Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children, auth = false }) => {
-  const isLoggedIn = localStorage.getItem("user:token") != null || true;
+  const isLoggedIn = localStorage.getItem("user:token") != null || Cookies.get("user_token") != null;
 
   if (!isLoggedIn && auth) {
     return <Navigate to={"/users/login"} />;
@@ -18,12 +21,19 @@ const ProtectedRoute = ({ children, auth = false }) => {
 };
 
 function App() {
+  useEffect(() => {
+    const token = Cookies.get("user_token");
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
+  }, []);
+
   return (
     <Routes>
       <Route
         path="/"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute auth={true}>
             <Dashboard />
           </ProtectedRoute>
         }

@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useNavigate } from "react-router-dom";
-const token = localStorage.getItem("user:token");
+import axios from "axios";
+import Cookies from "js-cookie";
+const token = localStorage.getItem("user_token");
 
 const Form = ({ isLoginPage = true }) => {
   const [data, setData] = useState({
@@ -30,28 +32,38 @@ const Form = ({ isLoginPage = true }) => {
     console.log("data => ", data);
 
     try {
-      const apiUrl = `${process.env.REACT_APP_API_URL}/${
+      // const apiUrl = `${process.env.API_URL}/api/users/${
+      //   isLoginPage ? "login" : "register"
+      // }`;
+      const apiUrl = `http://localhost:8000/api/users/${
         isLoginPage ? "login" : "register"
       }`;
       console.log("API URL: ", apiUrl);
 
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      });
+      const res = await axios.post(apiUrl, data);
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Network response was not ok");
+      // const res = await fetch(apiUrl, {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: isLoginPage ? undefined : `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify(data),
+      // });
+
+      if (isLoginPage) {
+        Cookies.set("user_token", res.data.token, { expires: 1 });
+        navigate("/");
+        // const errorData = await res.json();
+        // throw new Error(errorData.message || "Network response was not ok");
+      } else {
+        navigate("/users/login");
       }
-      const resData = await res.json();
-      console.log("resData => ", resData);
     } catch (error) {
-      console.error("Fetch error: ", error);
+      console.error(
+        "Axios error: ",
+        error.response ? error.response.data : error.message
+      );
     }
   };
 
@@ -71,24 +83,27 @@ const Form = ({ isLoginPage = true }) => {
           className="flex flex-col items-center w-full"
           onSubmit={handleSubmit}
         >
-          {!isLoginPage && (
-            <Input
-              label="Username"
-              name="username"
-              placeholder="Masukan username"
-              className="mb-3 w-[50%]"
-              value={data.username}
-              onChange={(e) => setData({ ...data, username: e.target.value })}
-            />
+          {isLoginPage && (
+            <>
+              <Input
+                label="Username"
+                name="username"
+                placeholder="Masukan username"
+                className="mb-3 w-[50%]"
+                value={data.username}
+                onChange={(e) => setData({ ...data, username: e.target.value })}
+              />
+              <Input
+                label="Password"
+                name="password"
+                placeholder="Masukan password"
+                className="mb-3 w-[50%]"
+                value={data.password}
+                onChange={(e) => setData({ ...data, password: e.target.value })}
+              />
+            </>
           )}
-          <Input
-            label="Password"
-            name="password"
-            placeholder="Masukan password"
-            className="mb-3 w-[50%]"
-            value={data.password}
-            onChange={(e) => setData({ ...data, password: e.target.value })}
-          />
+
           {!isLoginPage && (
             <>
               <Input
@@ -113,7 +128,7 @@ const Form = ({ isLoginPage = true }) => {
           )}
           <Button
             label={isLoginPage ? "Login" : "Daftar"}
-            className="mb-3 w-[295px] mt-7"
+            className="mb-3 w-1/2 mt-7"
             type="submit"
           />
         </form>
