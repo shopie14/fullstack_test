@@ -4,6 +4,9 @@ import Input from "../../components/Input";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ClipLoader } from "react-spinners";
 
 const Form = ({ isLoginPage = true }) => {
   const [data, setData] = useState({
@@ -25,46 +28,60 @@ const Form = ({ isLoginPage = true }) => {
     }));
   }, [isLoginPage]);
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
-    console.log("Data yang dikirim:", data); 
-  
+
+    console.log("Data yang dikirim:", data);
+
     try {
-      const apiUrl = `http://localhost:8000/api/users/${isLoginPage ? "login" : "register"}`;
+      const apiUrl = `http://localhost:8000/api/users/${
+        isLoginPage ? "login" : "register"
+      }`;
       console.log("API URL:", apiUrl);
-  
+
       const res = await axios.post(apiUrl, data);
-  
+
       console.log("Response dari server:", res.data);
-  
+
       if (res.status === 200 || res.status === 201) {
         const { tokenData, message } = res.data;
         console.log("Response message:", message);
         console.log("Response payload:", tokenData);
-  
+
         if (isLoginPage) {
           if (tokenData && tokenData.token) {
             Cookies.set("user_token", tokenData.token);
             localStorage.setItem("user_token", tokenData.token);
-            navigate("/");
+            toast.success("Login berhasil!");
+            setTimeout(() => navigate("/"), 2000);
           } else {
-            console.error("Token tidak ditemukan di tokenData");
+            toast.error("Token tidak ditemukan!");
+            // console.error("Token tidak ditemukan di tokenData");
           }
         } else {
-          navigate("/users/login");
+          toast.success("Registrasi berhasil! Silakan login.");
+          setTimeout(() => navigate("/users/login"), 2000);
         }
       } else {
-        console.error("Respon gagal dengan status:", res.status);
+        toast.error(`Gagal dengan status: ${res.status}`);
+        // console.error("Respon gagal dengan status:", res.status);
       }
     } catch (error) {
-      console.error(
-        "Axios error:",
-        error.response ? error.response.data : error.message
+      toast.error(
+        `Terjadi kesalahan: ${
+          error.response ? error.response.data : error.message
+        }`
       );
+      // console.error(
+      //   "Axios error:",
+      //   error.response ? error.response.data : error.message
+      // );
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   return (
     <div className="bg-primary-light h-screen flex items-center justify-center">
@@ -146,7 +163,11 @@ const Form = ({ isLoginPage = true }) => {
             label={isLoginPage ? "Login" : "Daftar"}
             className="mb-3 w-1/2 mt-7"
             type="submit"
+            disabled={loading}
           />
+          {loading && (
+            <ClipLoader color="#123abc" loading={loading} size={50} />
+          )}
         </form>
         <div className="mt-4">
           {isLoginPage ? (
@@ -172,6 +193,7 @@ const Form = ({ isLoginPage = true }) => {
           )}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
